@@ -1,11 +1,24 @@
 import Tabs from '@mui/joy/Tabs';
 import TabList from '@mui/joy/TabList';
 import Tab, { tabClasses } from '@mui/joy/Tab';
+import { useState, useEffect } from 'react';
+import Table from '@mui/joy/Table';
 import TabPanel from '@mui/joy/TabPanel';
 import StockTable from './stockComponents/StockTable';
-import Test from './stockComponents/Test';
-//yerr
+
 export default function TabsSegmentedControls() {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    if (!data) { // Effettua la richiesta solo se i dati non sono stati già caricati
+        fetch('http://localhost:5010/stock')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                setData(data);
+            })
+            .catch(error => console.error('Errore:', error));
+    }
+}, [data]); // Aggiungi data come dipendenza affinché l'effetto venga eseguito solo se i dati non sono stati già caricati
 
   return (
     <Tabs aria-label="tabs" defaultValue={0} sx={{ bgcolor: 'transparent' }}>
@@ -29,16 +42,17 @@ export default function TabsSegmentedControls() {
         <Tab disableIndicator sx={{ flex: 1 }}>Biggest USA</Tab>
       </TabList>
         <TabPanel value={0}>
-          <Test parameter="gainers"></Test>
+          <StockTable data={data} type="gainers" />
         </TabPanel>
         <TabPanel value = {1}>
-          <Test parameter="losers"></Test>
+          <StockTable data={data} type="losers" />
         </TabPanel>
         <TabPanel value = {2}>
-          <Test parameter="actives"></Test>
+          <StockTable data={data} type="actives" />
+   
         </TabPanel>
         <TabPanel value = {3}>
-          <Test></Test>
+  
         </TabPanel>
 
     </Tabs>
