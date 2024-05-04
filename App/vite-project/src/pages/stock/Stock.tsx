@@ -2,7 +2,6 @@ import Tabs from '@mui/joy/Tabs';
 import TabList from '@mui/joy/TabList';
 import Tab, { tabClasses } from '@mui/joy/Tab';
 import { useState, useEffect } from 'react';
-import Table from '@mui/joy/Table';
 import TabPanel from '@mui/joy/TabPanel';
 import StockTable from './stockComponents/StockTable';
 
@@ -48,7 +47,7 @@ export default function TabsSegmentedControls() {
           <StockTable data={data} type="losers" />
         </TabPanel>
         <TabPanel value = {2}>
-          <StockTable data={data} type="actives" />
+          <StockTable data={data} type="most_active" />
    
         </TabPanel>
         <TabPanel value = {3}>

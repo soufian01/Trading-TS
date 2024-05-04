@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Table from '@mui/joy/Table';
 import Sheet from '@mui/joy/Sheet';
 import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
-import Chip from '@mui/joy/Chip';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
@@ -11,7 +10,7 @@ function StockTable({ data, type }) {
   const [sortDirection, setSortDirection] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const rowsPerPage = 20;
+  const rowsPerPage = 10;
 
   const handleSort = (column) => {
     if (sortBy === column) {
@@ -34,7 +33,8 @@ function StockTable({ data, type }) {
     return 0;
   });
 
-  const totalPages = 5;
+  const totalPages = Math.ceil(sortedData.length / rowsPerPage);
+
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
 
@@ -45,16 +45,6 @@ function StockTable({ data, type }) {
     return null;
   };
 
-  const getChipColor = (value) => {
-    if (value > 0) {
-      return "success"; // Verde se il valore è maggiore di zero
-    } else if (value < 0) {
-      return "danger"; // Rosso se il valore è minore di zero
-    } else {
-      return "neutral"; // Grigio se il valore è zero o altro
-    }
-  };
-
   const goToPreviousPage = () => {
     setCurrentPage(prevPage => Math.max(1, prevPage - 1));
   };
@@ -62,7 +52,6 @@ function StockTable({ data, type }) {
   const goToNextPage = () => {
     setCurrentPage(prevPage => Math.min(totalPages, prevPage + 1));
   };
-
 
   return (
     <Sheet variant="soft" sx={{ pt: 1, borderRadius: 5 }}>
@@ -74,75 +63,48 @@ function StockTable({ data, type }) {
         <thead>
           <tr>
             <th
-              style={{ cursor: 'pointer', width: '2%', textAlign: 'center', verticalAlign: 'middle' }}>#
-            </th>
+            style={{ cursor: 'pointer', width: '3%', textAlign: 'center', verticalAlign: 'middle' }}>#</th>
             <th
               onClick={() => handleSort('symbol')}
-              style={{ cursor: 'pointer', width: '6.5%', textAlign: 'center', verticalAlign: 'middle' }}
+              style={{ cursor: 'pointer', width: '10%', textAlign: 'center', verticalAlign: 'middle' }}
             >
               {getSortIcon('symbol')} Symbol
             </th>
             <th
               onClick={() => handleSort('name')}
-              style={{ cursor: 'pointer', width: '21.5%', textAlign: 'center', verticalAlign: 'middle' }}
+              style={{ cursor: 'pointer', width: '40%', textAlign: 'center', verticalAlign: 'middle' }}
             >
               {getSortIcon('name')} Name
             </th>
             <th
               onClick={() => handleSort('price')}
-              style={{ cursor: 'pointer', width: '10%', textAlign: 'center', verticalAlign: 'middle' }}
+              style={{ cursor: 'pointer', textAlign: 'center', verticalAlign: 'middle' }}
             >
-              {getSortIcon('price')} Price ($)
+              {getSortIcon('price')} Price
             </th>
             <th
               onClick={() => handleSort('change')}
-              style={{ cursor: 'pointer', width: '10%', textAlign: 'center', verticalAlign: 'middle' }}
+              style={{ cursor: 'pointer', textAlign: 'center', verticalAlign: 'middle' }}
             >
-              {getSortIcon('change')} Change ($)
+              {getSortIcon('change')} Change
             </th>
             <th
               onClick={() => handleSort('changesPercentage')}
-              style={{ cursor: 'pointer', width: '10%', textAlign: 'center', verticalAlign: 'middle' }}
+              style={{ cursor: 'pointer', textAlign: 'center', verticalAlign: 'middle' }}
             >
-              {getSortIcon('changesPercentage')} Change (%)
+              {getSortIcon('changesPercentage')} Change %
             </th>
-            <th style={{ width: '10%', textAlign: 'center', verticalAlign: 'middle' }}>Volume</th>
-            <th style={{ width: '10%', textAlign: 'center', verticalAlign: 'middle' }}>Market Cap</th>
-            <th style={{ width: '7%', textAlign: 'center', verticalAlign: 'middle' }}>P/E Ratio</th>
           </tr>
         </thead>
         <tbody>
           {sortedData && sortedData.slice(startIndex, endIndex).map((item, index) => (
             <tr key={item.symbol}>
               <td style={{ textAlign: 'center', verticalAlign: 'middle', opacity: '0.8' }}>{startIndex + index + 1}</td>
-              <td style={{ textAlign: 'center', verticalAlign: 'middle', cursor: 'pointer' }}>
-                <a href={`stock/${item.symbol}`}><u>{item.symbol}</u></a>
-              </td>
-              <td style={{ textAlign: 'left', verticalAlign: 'middle' }}>{item.name}</td>
-              <td style={{ textAlign: 'center', verticalAlign: 'middle' }}><b>{item.price} $</b></td>
-              <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                <Chip
-                  color={getChipColor(item.change)}
-                  size="lg"
-                  variant="solid"
-                  label={`${item.change} %`}
-                >
-                  {item.change} $
-                </Chip>
-              </td>
-              <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                <Chip
-                  color={getChipColor(item.percent_change)}
-                  size="lg"
-                  variant="solid"
-                  label={`${item.percent_change} %`}
-                >
-                  {item.percent_change} %
-                </Chip>
-              </td>
-              <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>{item.volume}</td>
-              <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>{item.market_cap}</td>
-              <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>{item.pe_ratio}</td>
+              <td style={{ textAlign: 'center', verticalAlign: 'middle', cursor: 'pointer' }}>{item.symbol}</td>
+              <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>{item.name}</td>
+              <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>{item.price} $</td>
+              <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>{item.change} %</td>
+              <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>{item.changesPercentage} %</td>
             </tr>
           ))}
         </tbody>
@@ -159,4 +121,5 @@ function StockTable({ data, type }) {
     </Sheet>
   );
 }
+
 export default StockTable;

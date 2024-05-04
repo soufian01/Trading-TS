@@ -6,6 +6,7 @@ import Forgot from './pages/authentication/ForgotPassword';
 import Home from './pages/main/Home';
 import Data from './pages/main/Data';
 import Stock from './pages/stock/Stock';
+import Symbol from './pages/stock/Symbol';
 import './App.css';
 
 const theme = createTheme();
@@ -20,6 +21,7 @@ function App() {
         <Route path="/forgot" element={<Forgot />} />
         <Route path="/data" element={<Data />} />
         <Route path="/stock" element={<Stock />} />
+        <Route path="/stock/:symbol" element={<Symbol />} />
       </Routes>
     );
   };

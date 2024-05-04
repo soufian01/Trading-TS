@@ -1,49 +1,44 @@
-import aiohttp
 import asyncio
-import time
-import json
-from bs4 import BeautifulSoup
-import requests
-import pandas as pd
+from yahoo_fin.stock_info import get_day_gainers, get_day_losers, get_day_most_active
+from concurrent.futures import ThreadPoolExecutor
 
-apiKey = "4a5b0f1569f2e6952a07de4043845c54"
+def abbrevia_numero(numero):
+    if numero >= 1000000000:
+        return str(round(numero / 1000000000, 2)) + 'B'
+    elif numero >= 1000000:
+        return str(round(numero / 1000000, 2)) + 'M'
+    elif numero >= 1000:
+        return str(round(numero / 1000, 2)) + 'k'
+    else:
+        return str(round(numero, 2))
 
-async def get_sp500_symbols():
-    url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if response.status == 200:
-                html = await response.text()
-                soup = BeautifulSoup(html, "html.parser")
-                table = soup.find("table", {"id": "constituents"})
-                if table:
-                    symbols = []
-                    rows = table.find_all("tr")[1:]  # Skipping header row
-                    for row in rows:
-                        symbol = row.find_all("td")[0].text.strip()
-                        symbols.append(symbol)
-                    return symbols
-                else:
-                    print("Table not found on the page.")
-            else:
-                print("Failed to fetch page. Status code:", response.status)
+async def fetch_data():
+    with ThreadPoolExecutor() as executor:
+        loop = asyncio.get_event_loop()
+        gainers_task = loop.run_in_executor(executor, get_day_gainers)
+        losers_task = loop.run_in_executor(executor, get_day_losers)
+        most_active_task = loop.run_in_executor(executor, get_day_most_active)
 
-async def getStockData(session, apiKey, dataType):
-    url = f"https://financialmodelingprep.com/api/v3/stock_market/{dataType}?apikey={apiKey}"
-    async with session.get(url) as response:
-        json_data = await response.json()
-        return json_data
+        gainers, losers, most_active = await asyncio.gather(gainers_task, losers_task, most_active_task)
+    #rename the columsn name
+    gainers = gainers.rename(columns={"Symbol": "symbol", "Price (Intraday)": "price", "Change": "change", "% Change": "percent_change", "Name": "name", "Market Cap": "market_cap", "PE Ratio (TTM)": "pe_ratio", "Volume": "volume"})
+    losers = losers.rename(columns={"Symbol": "symbol", "Price (Intraday)": "price", "Change": "change", "% Change": "percent_change", "Name": "name", "Market Cap": "market_cap", "PE Ratio (TTM)": "pe_ratio", "Volume": "volume"})
+    most_active = most_active.rename(columns={"Symbol": "symbol", "Price (Intraday)": "price", "Change": "change", "% Change": "percent_change", "Name": "name", "Market Cap": "market_cap", "PE Ratio (TTM)": "pe_ratio", "Volume": "volume"})
+    
+
+
+
+    gainers.fillna("N/A", inplace=True)
+    losers.fillna("N/A", inplace=True)
+    most_active.fillna("N/A", inplace=True)
+
+    gainers = gainers.to_dict(orient="records")
+    losers = losers.to_dict(orient="records")
+    most_active = most_active.to_dict(orient="records")
+
+    return gainers, losers, most_active
 
 async def main():
-    async with aiohttp.ClientSession() as session:
-        return (
-            await getStockData(session, apiKey, "gainers"),
-            await getStockData(session, apiKey, "losers"),
-            await getStockData(session, apiKey, "actives")
-        )
+    gainers, losers, most_active = await fetch_data()
+    return gainers, losers, most_active
 
-def getTest(sessio, apiKey, dataType):
-    url = f"https://financialmodelingprep.com/api/v3/stock_market/{dataType}?apikey={apiKey}"
-    response = sessio.get(url)
-    json_data = response.json()
-    return json_data
