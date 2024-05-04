@@ -1,6 +1,7 @@
 import asyncio
 from yahoo_fin.stock_info import get_day_gainers, get_day_losers, get_day_most_active
 from concurrent.futures import ThreadPoolExecutor
+import finnhub
 
 def abbrevia_numero(numero):
     if numero >= 1000000000:
@@ -24,9 +25,6 @@ async def fetch_data():
     gainers = gainers.rename(columns={"Symbol": "symbol", "Price (Intraday)": "price", "Change": "change", "% Change": "percent_change", "Name": "name", "Market Cap": "market_cap", "PE Ratio (TTM)": "pe_ratio", "Volume": "volume"})
     losers = losers.rename(columns={"Symbol": "symbol", "Price (Intraday)": "price", "Change": "change", "% Change": "percent_change", "Name": "name", "Market Cap": "market_cap", "PE Ratio (TTM)": "pe_ratio", "Volume": "volume"})
     most_active = most_active.rename(columns={"Symbol": "symbol", "Price (Intraday)": "price", "Change": "change", "% Change": "percent_change", "Name": "name", "Market Cap": "market_cap", "PE Ratio (TTM)": "pe_ratio", "Volume": "volume"})
-    
-
-
 
     gainers.fillna("N/A", inplace=True)
     losers.fillna("N/A", inplace=True)
@@ -41,4 +39,12 @@ async def fetch_data():
 async def main():
     gainers, losers, most_active = await fetch_data()
     return gainers, losers, most_active
+
+
+def get_company_profile(symbol):
+    # Imposta la tua chiave API di Finnhub
+    api_key = "cmatmrpr01qmqia32nf0cmatmrpr01qmqia32nfg"
+    finnhub_client = finnhub.Client(api_key=api_key)
+    company_info = finnhub_client.company_profile2(symbol=symbol)
+    return company_info
 
